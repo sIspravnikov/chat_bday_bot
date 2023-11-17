@@ -1,23 +1,28 @@
-import logging
+
 from aiogram import Router, F
 from aiogram.filters import Command
-from keyboards.keyboards import row_keyboard
+from keyboards.keyboards import inline_button_builder, custom_keyboard
 from aiogram.types import Message
-
 from config_reader import config
 
 router = Router()
+secret_password = config.secret_password.get_secret_value()
 
 @router.message(Command("start"))
 async def start_cmd(message: Message):
     if (message.from_user.username is not None):
         await message.answer(
-            text=f"Привет! Можешь зарегистрировать свой день рождения @{ message.from_user.username }, но сначала нужен пароль",
-            reply_markup=row_keyboard(['/password'], 1)
+            f"Привет, @{message.from_user.username}! Для начала нужен пароль",
+            reply_markup=inline_button_builder("Ввести пароль", "password")
+        )
+    elif (message.from_user.first_name is not None):
+        await message.answer(
+            f"Привет, {message.from_user.first_name}! У тебя не указан username в профиле\n"
+            f"Возвращайся и снова жми /start, когда исправишь",
         )
     else:
         await message.answer(
-            text="Привет! У тебя не указан username в профиле, фу так(им/ой) быть\n"
-                 "Возвращайся, когда исправишь",
-            reply_markup=row_keyboard(['/start'], 1)
+            f"Что-то пошло не так",
         )
+
+
